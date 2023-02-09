@@ -67,13 +67,23 @@ with open('classprep.txt', 'r') as f:
         s = line.split(' - ')
         exercise_page = s[0].split('(pg')
         exercise = exercise_page[0].strip(' ')
-        page = int(exercise_page[1].strip('). '))
+        page = exercise_page[1].strip('). ')
+        if '-' in page:
+            page = page.split('-')
+            page = [int(i) for i in page]
+            page = list(range(page[0], page[1] + 1))
+        else:
+            page = [int(page)]
         questions = s[1].split(', ')
         classprepPages.append((exercise, page, questions))
 
 # Get pages
-for _, i, _ in classprepPages:
-    get_page(i)
+pagesRead = []
+for _, pages, _ in classprepPages:
+    for i in pages:
+        if i not in pagesRead:
+            get_page(i)
+            pagesRead.append(i)
 
 # Close browser
 driver.quit()
