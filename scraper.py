@@ -9,8 +9,11 @@ from time import sleep
 
 import os
 
+import getpass
+
 username = '24sdas@student.dasd.org'
-password = 'KochSnowflake@625'
+password = getpass.getpass()
+print(password)
 
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
