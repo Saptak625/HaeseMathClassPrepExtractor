@@ -7,7 +7,7 @@ import os
 
 def png_to_pdf(title, classprepPages):
     png_files = os.listdir('cropped')
-    png_files = [os.path.join('cropped', png) for png in png_files]
+    png_files = sorted([os.path.join('cropped', png) for png in png_files])
     header = None
 
     c = canvas.Canvas(f'{title}.pdf', pagesize=letter)
@@ -20,12 +20,12 @@ def png_to_pdf(title, classprepPages):
     c.line(40, y-5, 40 + text_width, y-5)
     y -= 30
     for i, png in enumerate(png_files):
-        if int(png.split('_')[0].split('\\')[1]) != header:
+        if int(png.split('_')[0].replace('/', '\\').split('\\')[1]) != header:
             if header is not None:
                 c.showPage()
                 y = 792
                 y -= 50
-            header = int(png.split('_')[0].split('\\')[1])
+            header = int(png.split('_')[0].replace('/', '\\').split('\\')[1])
             c.setFont('Helvetica', 16)
             header_title = f'{classprepPages[header][0]} (pg. {", ".join([str(i) for i in classprepPages[header][1]])}) - #{", ".join(classprepPages[header][2])}'
             c.drawString(40, y, header_title)
