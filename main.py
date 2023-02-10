@@ -24,7 +24,7 @@ with open('classprep.txt', 'r') as f:
         classprepPages.append((exercise, page, questions))
 
 # Scrape pages
-scrape(classprepPages)
+# scrape(classprepPages)
 
 # Start Image Cropper to get Questions
 root = tk.Tk()
@@ -33,4 +33,4 @@ root.mainloop()
 
 # Convert pngs to pdf
 # Read all png files in the cropped directory
-png_to_pdf(input('Class Prep Unit Title: '), classprepPages)
+# png_to_pdf(input('Class Prep Unit Title: '), classprepPages)

@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import os
 
+
 class ImageCropper:
     def __init__(self, root, classprepPages):
         print('\nImage Cropper Started')
@@ -15,8 +16,8 @@ class ImageCropper:
         self.canvas = tk.Canvas(root, width=self.image.width, height=self.image.height)
         self.canvas.pack()
         self.set_image(delete=False)
-        self.escaped = False
-        
+        self.rect = None
+
         self.next_page_button = tk.Button(root, text="Page >>", command=self.next_page)
         self.next_page_button.config(height=5, width=15)
         self.next_page_button.pack(side="right")
@@ -24,7 +25,7 @@ class ImageCropper:
         self.previous_page_button = tk.Button(root, text="<< Page", command=self.previous_page)
         self.previous_page_button.config(height=5, width=15)
         self.previous_page_button.pack(side="left")
-        
+
         self.next_assignment_button = tk.Button(root, text="Assignment >>", command=self.next_assignment)
         self.next_assignment_button.config(height=5, width=15)
         self.next_assignment_button.pack(side="right")
@@ -39,7 +40,6 @@ class ImageCropper:
         self.canvas.bind("<ButtonPress-1>", self.on_press)
         self.canvas.bind("<B1-Motion>", self.on_motion)
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
-        self.canvas.bind("<Escape>", self.on_escape)
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -50,9 +50,8 @@ class ImageCropper:
                 os.remove(os.path.join('cropped', file))
         else:
             os.makedirs('cropped')
-        
+
     def on_press(self, event):
-        self.escaped = False
         self.start_x, self.start_y = event.x, event.y
         self.rect = self.canvas.create_rectangle(0, 0, 0, 0, outline="red", width=2)
 
@@ -60,17 +59,23 @@ class ImageCropper:
         self.end_x, self.end_y = event.x, event.y
         x1, y1 = min(self.start_x, self.end_x), min(self.start_y, self.end_y)
         x2, y2 = max(self.start_x, self.end_x), max(self.start_y, self.end_y)
-        self.canvas.coords(self.rect, x1, y1, x2, y2)
+        if self.rect:
+            self.canvas.coords(self.rect, x1, y1, x2, y2)
 
     def on_release(self, event):
         self.end_x, self.end_y = event.x, event.y
-        if not self.escaped:
+        if (self.start_x < 0 or self.start_x > self.image.width) or (
+                self.end_x < 0 or self.end_x > self.image.width) or (
+                self.start_y < 0 or self.start_y > self.image.height) or (
+                self.start_y < 0 or self.start_y > self.image.height):
+            self.on_escape(event)
+        else:
             self.crop_image()
 
     def on_escape(self, event):
-        print('Escape Pressed')
-        self.escaped = True
-        self.canvas.delete(self.rect)
+        if self.rect:
+            self.canvas.delete(self.rect)
+            self.rect = None
 
     def on_closing(self):
         self.root.destroy()
@@ -86,6 +91,7 @@ class ImageCropper:
     def next_page(self):
         self.pageNumber += 1
         self.update()
+
     def previous_page(self):
         self.pageNumber -= 1
         self.update()
@@ -103,13 +109,14 @@ class ImageCropper:
     def update(self, delete=True):
         self.get_image()
         self.set_image(delete=delete)
-    
+
     def get_image(self):
         self.assignment = self.assignmentNumber % len(self.classprepPages)
         self.page = self.pageNumber % len(self.classprepPages[self.assignment][1])
         self.exercise, self.pages, self.questions = self.classprepPages[self.assignment]
 
-        self.root.title(f"Pg {self.pages[self.page]} --- {self.exercise} (pg. {self.pages}) - {', '.join(self.questions)}")
+        self.root.title(
+            f"Pg {self.pages[self.page]} --- {self.exercise} (pg. {self.pages}) - {', '.join(self.questions)}")
         self.image = Image.open(f'pages/{self.pages[self.page]}.png')
         self.tk_image = ImageTk.PhotoImage(self.image)
 
