@@ -11,11 +11,14 @@ import sys
 import getpass
 
 def scrape(classprepPages):
-    username = '24sdas@student.dasd.org'
+    username = input('Enter username: ')
     password = getpass.getpass()
     print(password)
 
-    driver = webdriver.Chrome()
+    # Setup Selenium
+    options = Options()
+    options.add_argument("--start-maximized")
+    driver = webdriver.Chrome(options=options)
     driver.get('https://snowflake.haesemathematics.com.au/viewer/mathematics-analysis-and-approaches-hl/book/ibhl-aaa-2/1')
     print('Opened Page...')
 
@@ -76,4 +79,4 @@ def scrape(classprepPages):
 
     # Close browser
     driver.quit()
-    print('Finished')
+    print('Finished Scraping')

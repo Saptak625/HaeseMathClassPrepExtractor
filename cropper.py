@@ -4,6 +4,7 @@ import os
 
 class ImageCropper:
     def __init__(self, root, classprepPages):
+        print('\nImage Cropper Started')
         self.saveNumber = 1
         self.pageNumber = 0
         self.assignmentNumber = 0
@@ -14,6 +15,7 @@ class ImageCropper:
         self.canvas = tk.Canvas(root, width=self.image.width, height=self.image.height)
         self.canvas.pack()
         self.set_image(delete=False)
+        self.escaped = False
         
         self.next_page_button = tk.Button(root, text="Page >>", command=self.next_page)
         self.next_page_button.config(height=5, width=15)
@@ -37,6 +39,7 @@ class ImageCropper:
         self.canvas.bind("<ButtonPress-1>", self.on_press)
         self.canvas.bind("<B1-Motion>", self.on_motion)
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
+        self.canvas.bind("<Escape>", self.on_escape)
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -49,6 +52,7 @@ class ImageCropper:
             os.makedirs('cropped')
         
     def on_press(self, event):
+        self.escaped = False
         self.start_x, self.start_y = event.x, event.y
         self.rect = self.canvas.create_rectangle(0, 0, 0, 0, outline="red", width=2)
 
@@ -60,7 +64,13 @@ class ImageCropper:
 
     def on_release(self, event):
         self.end_x, self.end_y = event.x, event.y
-        self.crop_image()
+        if not self.escaped:
+            self.crop_image()
+
+    def on_escape(self, event):
+        print('Escape Pressed')
+        self.escaped = True
+        self.canvas.delete(self.rect)
 
     def on_closing(self):
         self.root.destroy()
@@ -69,7 +79,7 @@ class ImageCropper:
         x1, y1 = min(self.start_x, self.end_x), min(self.start_y, self.end_y)
         x2, y2 = max(self.start_x, self.end_x), max(self.start_y, self.end_y)
         cropped_image = self.image.crop((x1, y1, x2, y2))
-        cropped_image.save(f'cropped/{self.saveNumber}.png')
+        cropped_image.save(f'cropped/{self.assignment}_{self.saveNumber}.png')
         print('Saved Cropped Image', self.saveNumber)
         self.saveNumber += 1
 
